@@ -1,0 +1,4 @@
+interface:
+  display_name: "CloudRelay ImageGen"
+  short_description: "通过 CloudRelay 异步接口生成和编辑图片"
+  default_prompt: "使用 $cloudrelay-imagegen 根据我的提示词生成图片并保存到工作区。"
