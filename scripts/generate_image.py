@@ -19,7 +19,7 @@ import uuid
 
 BASE_URL = "https://cloudrelay.cn"
 ENV_NAME = "CLOUDRELAY_IMAGE_API_KEY"
-USER_AGENT = "Mozilla/5.0 (compatible; cloudrelay-imagegen-skill/1.0)"
+USER_AGENT = "Mozilla/5.0 (compatible; cloudrelay-imagegen-skill/1.1)"
 TERMINAL_STATUSES = {"completed", "failed", "canceled"}
 
 
@@ -48,14 +48,27 @@ def _read_windows_user_environment(name: str) -> str | None:
         return None
 
 
+def _read_posix_secret_file() -> str | None:
+    config_root = os.environ.get("XDG_CONFIG_HOME")
+    root = Path(config_root).expanduser() if config_root else Path.home() / ".config"
+    try:
+        return (root / "cloudrelay" / "imagegen-api-key").read_text(
+            encoding="utf-8"
+        ).strip() or None
+    except OSError:
+        return None
+
+
 def _api_key() -> str:
     key = (os.environ.get(ENV_NAME) or "").strip()
     if not key:
         key = _read_windows_user_environment(ENV_NAME) or ""
     if not key:
+        key = _read_posix_secret_file() or ""
+    if not key:
         raise CloudRelayError(
             f"{ENV_NAME} is not configured. Create a CloudRelay API key in the "
-            'group named "生图专用", then configure the environment variable.'
+            'group named "生图专用", then run configure_api_key.py.'
         )
     return key
 
