@@ -22,6 +22,8 @@
 
 ## 安装
 
+不使用 Git 时，可以从 [Releases](https://github.com/CloudRelay-Code/cloudrelay-imagegen-skill/releases/latest) 下载最新源码压缩包。解压后，将其中的 `cloudrelay-imagegen` 文件夹复制到 `~/.codex/skills/`。
+
 ### Windows PowerShell
 
 ```powershell
