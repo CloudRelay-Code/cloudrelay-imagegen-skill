@@ -31,6 +31,11 @@ class SkillContractTests(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self.assertTrue((self.repository / relative_path).is_file())
 
+    def test_async_timeout_rationale_is_preserved(self) -> None:
+        self.assertIn("120-second", self.body)
+        self.assertIn("retain its job ID", self.body)
+        self.assertIn("never replace polling", self.body)
+
     def test_openai_metadata_is_valid(self) -> None:
         metadata = yaml.safe_load(
             (self.repository / "agents/openai.yaml").read_text(encoding="utf-8")

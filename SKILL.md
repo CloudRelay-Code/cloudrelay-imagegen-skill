@@ -7,6 +7,10 @@ description: "Generate or edit images through the CloudRelay asynchronous image 
 
 Use the bundled scripts for every CloudRelay image request. Keep credentials out of conversations, source files, shell history, repositories, and generated artifacts.
 
+## Purpose
+
+CloudRelay provides this asynchronous image workflow because native synchronous image-generation requests can run beyond Cloudflare's approximately 120-second request window and be terminated before the client receives the result. This skill teaches agent clients to submit a job once, retain its job ID, poll with separate requests until a terminal status is reached, and then save the returned images. Preserve that asynchronous flow; never replace polling with one long-running HTTP request or submit a duplicate job merely because generation takes time.
+
 ## Workflow
 
 1. Collect the prompt, optional input image, output directory, model, size, quality, and image count. Use these defaults when unspecified:

@@ -2,6 +2,14 @@
 
 通过 [CloudRelay](https://cloudrelay.cn) 异步图片 API 生成和编辑图片的跨客户端 Agent Skill。同一份 `SKILL.md` 原生兼容 Codex、Claude Code、Gemini CLI、OpenClaw 和 Cursor，不需要维护客户端分叉版本。
 
+## 为什么使用异步接口
+
+原生同步生图接口需要在图片生成期间持续保持 HTTP 连接。当生成耗时超过约 120 秒时，请求容易触发 Cloudflare 超时并被中断，即使后端仍在继续生成，客户端也可能无法取得最终结果。
+
+CloudRelay 为此开发了异步生图接口：客户端只需提交一次生成任务并保存返回的任务 ID，随后通过独立的轮询请求查询状态，任务完成后再获取并保存图片。这样可以避免让一次长连接贯穿整个生成过程，降低长耗时任务被 Cloudflare 超时掐断的风险。
+
+本 Skill 的目的，是让 Codex、Claude Code、Gemini CLI、OpenClaw、Cursor 等 Agent 客户端快速掌握并可靠执行这套异步调用流程，包括安全配置凭据、提交任务、保存任务 ID、持续轮询、处理终态、下载结果和报告异常。
+
 ## 功能
 
 - 使用 `gpt-image-2` 等 CloudRelay 支持的模型生成图片
