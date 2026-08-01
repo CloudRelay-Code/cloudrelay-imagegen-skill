@@ -18,7 +18,8 @@ class PackageSkillTests(unittest.TestCase):
                     set(archive.namelist()),
                     {path.as_posix() for path in package_skill.PACKAGE_FILES},
                 )
-                self.assertTrue(archive.read("SKILL.md").startswith(b"---\n"))
+                skill_text = archive.read("SKILL.md").decode("utf-8")
+                self.assertEqual(skill_text.splitlines()[0], "---")
 
 
 if __name__ == "__main__":
