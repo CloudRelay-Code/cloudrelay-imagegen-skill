@@ -9,12 +9,20 @@ from pathlib import Path
 import shutil
 import sys
 
+from scripts._update_common import UpdateError, ensure_safe_path
+
 
 SKILL_NAME = "cloudrelay-imagegen"
 CORE_FILES = (
     Path("SKILL.md"),
+    Path("VERSION"),
     Path("scripts/configure_api_key.py"),
     Path("scripts/generate_image.py"),
+    Path("scripts/_update_common.py"),
+    Path("scripts/check_update.py"),
+    Path("scripts/update.py"),
+    Path("scripts/update.ps1"),
+    Path("scripts/update.sh"),
 )
 CODEX_FILES = (Path("agents/openai.yaml"),)
 
@@ -68,7 +76,7 @@ def destination_for(
 ) -> Path:
     spec = CLIENTS[client]
     root = home / spec.user_root if scope == "user" else project_dir / spec.project_root
-    return root.expanduser().resolve() / SKILL_NAME
+    return root.expanduser().absolute() / SKILL_NAME
 
 
 def _validate_source(source_root: Path, client: str) -> tuple[Path, ...]:
@@ -76,6 +84,12 @@ def _validate_source(source_root: Path, client: str) -> tuple[Path, ...]:
     missing = [str(path) for path in files if not (source_root / path).is_file()]
     if missing:
         raise InstallError("Missing required source file(s): " + ", ".join(missing))
+    try:
+        ensure_safe_path(source_root)
+        for relative in files:
+            ensure_safe_path(source_root / relative)
+    except UpdateError as error:
+        raise InstallError(str(error)) from error
     return files
 
 
@@ -103,11 +117,18 @@ def install_client(
     if dry_run:
         return destination
 
-    destination.mkdir(parents=True, exist_ok=True)
-    for relative_path in files:
-        target = destination / relative_path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source_root / relative_path, target)
+    try:
+        ensure_safe_path(destination)
+        destination.mkdir(parents=True, exist_ok=True)
+        for relative_path in files:
+            target = destination / relative_path
+            ensure_safe_path(target)
+            if target.exists() and not target.is_file():
+                raise InstallError(f"Refusing to replace a non-regular file: {target}")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source_root / relative_path, target)
+    except UpdateError as error:
+        raise InstallError(str(error)) from error
     return destination
 
 

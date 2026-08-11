@@ -19,10 +19,14 @@ jobs:
       - name: Install validation dependency
         run: python -m pip install -r requirements-dev.txt
       - name: Compile scripts
-        run: python -m py_compile scripts/configure_api_key.py scripts/generate_image.py install.py tools/package_skill.py
+        run: python -m py_compile scripts/configure_api_key.py scripts/generate_image.py scripts/_update_common.py scripts/check_update.py scripts/update.py install.py tools/package_skill.py tools/sync_adapters.py
       - name: Run tests
         run: python -m unittest discover -s tests -v
       - name: Exercise installer mapping
         run: python install.py --client all --dry-run
       - name: Build distributable skill
         run: python tools/package_skill.py
+      - name: Synchronize adapter copies
+        run: python tools/sync_adapters.py
+      - name: Verify adapter copies are committed
+        run: git diff --exit-code -- adapters

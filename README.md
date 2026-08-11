@@ -1,5 +1,31 @@
 # CloudRelay ImageGen
 
+This repository is versioned through the root `VERSION` file. The installed skill can check for a newer release without changing files, and it can apply a verified release when explicitly authorized.
+
+Check the installed copy:
+
+```bash
+python scripts/check_update.py
+```
+
+Apply an update with an interactive confirmation:
+
+```bash
+python scripts/update.py --apply
+```
+
+For a trusted scheduled job that has been explicitly configured for unattended updates:
+
+```bash
+python scripts/update.py --auto
+```
+
+To opt in to applying verified updates automatically when the skill activates, set `CLOUDRELAY_IMAGEGEN_AUTO_UPDATE=1` in the host environment. Without that explicit opt-in, activation performs a read-only check and reports an available update instead of changing files.
+
+The updater only trusts the GitHub Releases endpoint for this repository, requires the release asset SHA-256 digest, validates the downloaded archive before replacement, and updates only managed runtime files. The digest verifies transfer/content integrity against the GitHub API response; it is not a publisher signature, so GitHub and repository-release access remain the trust root. It never reads or writes the CloudRelay API key, generated images, or unrelated files. Network failures during the normal skill activation check are non-fatal.
+
+For each release, make the Git tag, root `VERSION`, adapter manifest versions, and packaged asset version identical. Upload the asset as `cloudrelay-imagegen.skill`; the updater rejects a missing digest, a tag/archive version mismatch, a downgrade, or an archive that omits the updater runtime files.
+
 通过 [CloudRelay](https://cloudrelay.cn) 异步图片 API 生成和编辑图片的跨客户端 Agent Skill。同一份 `SKILL.md` 原生兼容 Codex、Claude Code、Gemini CLI、OpenClaw 和 Cursor，不需要维护客户端分叉版本。
 
 ## 为什么使用异步接口

@@ -11,9 +11,15 @@ import zipfile
 SKILL_NAME = "cloudrelay-imagegen"
 PACKAGE_FILES = (
     Path("SKILL.md"),
+    Path("VERSION"),
     Path("agents/openai.yaml"),
     Path("scripts/configure_api_key.py"),
     Path("scripts/generate_image.py"),
+    Path("scripts/_update_common.py"),
+    Path("scripts/check_update.py"),
+    Path("scripts/update.py"),
+    Path("scripts/update.ps1"),
+    Path("scripts/update.sh"),
 )
 
 
