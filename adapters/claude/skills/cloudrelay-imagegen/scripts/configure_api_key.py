@@ -28,13 +28,22 @@ def _secret_file() -> Path:
     return root / "cloudrelay" / "imagegen-api-key"
 
 
-def _read_key() -> str:
-    key = getpass.getpass("CloudRelay image API key: ").strip()
+def _validate_key(key: str) -> str:
+    key = key.strip()
     if not key:
         raise ValueError("No API key was provided.")
     if any(character.isspace() for character in key):
         raise ValueError("The API key must not contain whitespace.")
     return key
+
+
+def _read_key() -> str:
+    return _validate_key(getpass.getpass("CloudRelay image API key: "))
+
+
+def _read_key_from_stdin() -> str:
+    """Read a user-provided key without placing it in argv or shell history."""
+    return _validate_key(sys.stdin.read())
 
 
 def _read_windows_user_variable() -> str | None:
@@ -106,6 +115,11 @@ def main() -> int:
         action="store_true",
         help="Report whether a key is configured without displaying its value.",
     )
+    parser.add_argument(
+        "--key-stdin",
+        action="store_true",
+        help="Read the key from stdin; use only when the user has provided it directly.",
+    )
     args = parser.parse_args()
 
     if args.check:
@@ -116,7 +130,10 @@ def main() -> int:
         return 1
 
     try:
-        key = _read_key()
+        key = _read_key_from_stdin() if args.key_stdin else _read_key()
+        # Make the credential available immediately to this process as well as
+        # to future processes launched after the persistent write completes.
+        os.environ[ENV_NAME] = key
         if os.name == "nt":
             _persist_windows_user_variable(key)
             location = f"the Windows user environment variable {ENV_NAME}"

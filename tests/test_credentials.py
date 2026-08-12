@@ -12,6 +12,18 @@ from scripts import generate_image
 
 
 class CredentialTests(unittest.TestCase):
+    def test_key_validation_trims_outer_whitespace(self) -> None:
+        self.assertEqual(configure_api_key._validate_key("  test-key-value\n"), "test-key-value")
+
+    def test_key_validation_rejects_internal_whitespace(self) -> None:
+        with self.assertRaisesRegex(ValueError, "must not contain whitespace"):
+            configure_api_key._validate_key("test key value")
+
+    def test_key_stdin_reader_does_not_use_command_line_arguments(self) -> None:
+        with mock.patch.object(configure_api_key.sys, "stdin") as stdin:
+            stdin.read.return_value = "test-key-value\n"
+            self.assertEqual(configure_api_key._read_key_from_stdin(), "test-key-value")
+
     def test_posix_persistence_writes_outside_skill(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             secret_file = Path(temporary) / "cloudrelay" / "imagegen-api-key"
