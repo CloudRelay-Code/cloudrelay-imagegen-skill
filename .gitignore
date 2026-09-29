@@ -1,0 +1,9 @@
+# Local build products, generated output, and credentials
+__pycache__/
+*.py[cod]
+dist/
+generated-images/
+generated-videos/
+.env
+.env.*
+imagegen-api-key-*

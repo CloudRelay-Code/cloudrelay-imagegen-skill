@@ -1,0 +1,5 @@
+# Preserve the tested legacy runtime bytes across Git platforms.
+/SKILL.md -text
+/VERSION -text
+/agents/** -text
+/scripts/** -text
